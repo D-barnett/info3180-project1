@@ -8,7 +8,7 @@ This file creates your application.
 from app import app, db, login_manager
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, current_user, login_required
-from forms import LoginForm
+from forms import ProfileForm
 from models import UserProfile
 
 
@@ -25,6 +25,23 @@ def home():
 def about():
     """Render the website's about page."""
     return render_template('about.html')
+    
+@app.route("/profile/<userid>")
+def view_profile(userid):
+    user=UserProfile.query.filter_by(userid==id).first()
+    if user is None:
+        return render_template('404.html')
+    return render_template('profiles.html', user=user)
+    
+@app.route("/profiles")
+def view_user_profiles():
+    return render_template('profiles.html')
+    
+
+@app.route("/profile")
+def create_userprofile():
+    return render_template('profiles.html')
+    
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
