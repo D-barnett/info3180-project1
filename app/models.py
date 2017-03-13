@@ -11,6 +11,7 @@ class UserProfile(db.Model):
     gender = db.Column(db.String(8))
     image = db.Column(db.LargeBinary)
     created_on = db.Column(db.DateTime(), default=datetime.utcnow)
+    email = db.Column(db.String(120), unique=True)
 
     def is_authenticated(self):
         return True
@@ -27,7 +28,7 @@ class UserProfile(db.Model):
         except NameError:
             return str(self.id)  # python 3 support
 
-    def __init__(self, first_name, last_name, username, age, biography, gender, image, created_on):
+    def __init__(self, first_name, last_name, username, age, biography, gender, image, created_on, email):
         self.first_name=first_name
         self.last_name=last_name
         self.username=username
@@ -36,6 +37,7 @@ class UserProfile(db.Model):
         self.gender=gender
         self.image=image
         self.created_on=created_on
+        self.email=email
     
     
     def __repr__(self):
