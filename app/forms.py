@@ -1,8 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, TextField, PasswordField, RadioField, TextAreaField, IntegerField, SubmitField, FileField
 from flask_wtf.file import FileField, FileRequired
-from wtforms.validators import InputRequired
-
+from wtforms.validators import InputRequired, Email
+from models import db, UserProfile
 
 class ProfileForm(FlaskForm):
     username = TextField('Username', validators=[InputRequired()])
@@ -10,8 +10,31 @@ class ProfileForm(FlaskForm):
     last_name = TextField('Lastname', validators=[InputRequired()])
     age = TextField('Age', validators=[InputRequired()])
     biography = TextAreaField('Biography', validators=[InputRequired()])
+    email = TextField('Email', validators=[FileRequired(), Email()])
     image = FileField('Image', validators=[FileRequired()])
     gender = SelectField('Gender', choices = [('M','Male'),('F','Female')], validators=[InputRequired()])
-    submit = SubmitField('Send')
+    submit = SubmitField('Create Profile')
+    
+    
+class loginForm(FlaskForm):
+    username = TextField('Username', validators=[InputRequired()])
+    email = TextField('Email', validators=[FileRequired(), Email()])
+    submit = SubmitField('login')
+    
+    def __init__(self, *args, **kwargs):
+       FlaskForm.__init__(self, *args, **kwargs)
+    
+    def validate(self):
+      if not FlaskForm.validate(self):
+        return False
+     
+      user = UserProfile.query.filter_by(email = self.email.data.lower()).first()
+      if user:
+        self.email.errors.append("That email is already taken")
+        return False
+      else:
+        return True
+    
+    
     
     

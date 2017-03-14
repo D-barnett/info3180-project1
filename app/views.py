@@ -8,9 +8,8 @@ This file creates your application.
 from app import app, db, login_manager
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, current_user, login_required
-from forms import ProfileForm
+from forms import ProfileForm, loginForm
 from models import UserProfile
-
 
 ###
 # Routing for your application.
@@ -27,6 +26,7 @@ def about():
     return render_template('about.html')
     
 @app.route("/profile/<userid>")
+@login_required
 def view_profile(userid):
     user=UserProfile.query.filter_by(userid==id).first()
     if user is None:
@@ -34,36 +34,84 @@ def view_profile(userid):
     return render_template('profiles.html', user=user)
     
 @app.route("/profiles")
+@login_required
 def view_user_profiles():
+    user = UserProfile()
+    db.session.query(user).all()
     return render_template('profiles.html')
-    
+    #@app.route('/filelisting', methods=['POST', 'GET'])
+#def filelisting():
+ #   if not session.get('logged_in'):
+  #      abort(401)
+        
+  #  listpath = os.walk('/home/ubuntu/workspace/app/static/uploads' )
+  #  for file in listpath:         
+  #      print file
+  #  return render_template('filelist.html', filelist=file)
 
-@app.route("/profile")
+@app.route("/profile", methods=('GET', 'POST'))
 def create_userprofile():
-    return render_template('profiles.html')
+    form = ProfileForm()
+    if request.method == 'POST'and form.validate_on_submit():
+        user = UserProfile(form.username.data, form.first_name.data, form.last_name.data, form.age.data, form.biography.data, form.email.data, form.image.data, form.gender.data)
+        db.session.add(user)
+        db.session.commit()
+        login_user(user)
+        return redirect(url_for('my_profile'))
+    elif request.method == 'GET':
+      return render_template('profile.html', form=form)
+     
+@app.route("/my_profile")
+@login_required
+def my_profile():
+    return render_template('your_profile.html')
+    
+    #if form.validate_on_submit():
+    #    user = UserProfile()
+    #    form.populate_obj(user)
+    #    db.session.add(user)
+    #    db.session.commit()
+    #    login_user(user)
+    #    return redirect(url_for('tracking.index'))
+    #return render_template('profile.html', form=form)
+    # if user == None:
+    #    flash('User %s not found.' % nickname)
+    #    return redirect(url_for('login.html'))
+    #return render_template('profiles.html')
     
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    form = LoginForm()
-    if request.method == "POST":
-        # change this to actually validate the entire form submission
-        # and not just one field
-        if form.username.data:
-            # Get the username and password values from the form.
+    form = loginForm()
+    # Validates that a username and password was entered on your login form
+    if request.method == 'POST' and form.validate_on_submit():
+        if form.username.data:    
+            # Gets the username and password values from the form.
+           username = request.form['username']
+           email = request.form['email'] 
+            
+             # checks that the username and password entered matches a user that is in the database.
+           user = UserProfile.query.filter(username==username, email==email).first()
+            
+           login_user(user)
 
-            # using your model, query database for a user based on the username
-            # and password submitted
-            # store the result of that query to a `user` variable so it can be
-            # passed to the login_user() method.
-
-            # get user id, load into session
-            login_user(user)
-
-            # remember to flash a message to the user
-            return redirect(url_for("home")) # they should be redirected to a secure-page route instead
+            # flashes a message to the user
+           flash('Logged in successfully.', 'success')
+           return redirect(url_for("my_profile"))
+           
+           if user is None:
+                flash('Username or email is invalid' , 'error')
+           
     return render_template("login.html", form=form)
 
+@app.route("/logout")
+@login_required
+def logout():
+    # Logouts the user and ends the session
+    logout_user()
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('home'))
+    
 # user_loader callback. This callback is used to reload the user object from
 # the user ID stored in the session
 @login_manager.user_loader

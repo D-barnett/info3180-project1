@@ -1,3 +1,9 @@
 body {
     padding-top: 50px;
 }
+
+.flash {
+  background-color: #FBB0B0;
+  padding: 10px;
+  width: 400px;
+}

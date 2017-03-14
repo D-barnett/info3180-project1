@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block css %} 
+<style type="text/css">
+h1{
+    margin-left:309px;
+  }
+
+  .space {
+    padding: 10px;
+  }
+
+  .middle {
+    padding: 5px;
+  }
+
+  #info {
+    padding: 8px;
+    width:97%;
+  }
+  
+  hr{
+    color:#dddddd;
+  }
+  
+  #name {
+    background-color: #dddddd;
+    padding: 10px;
+  }
+
+  #mainbox {
+    border: 1px solid #dddddd;
+    border-radius: 5px;
+    padding: 0px;
+    float:right;
+    width:40%;
+    margin-right:100px;
+  }
+
+  img {
+  border: 5px solid #f5efef;
+  width:225px; 
+  height:210px;
+  margin-bottom:50px;
+  float:left;
+  margin-left:310px;
+  }
+</style>
+{% endblock %}
+
+{% block main %}
+
+<h1>Profile</h1>
+<hr>
+<br>
+<div>
+  <div>
+    <img src="{{url_for('static', filename='femalestudent.jpg')}}"/> 
+  </div>
+  <div id="mainbox">
+    <div id="name"><strong>{{ first_name}} {{last_name}}</strong></div>
+    <div id="info">
+      <div class="space">{{ created_on }}</div><hr>
+      <div class="middle"><strong>Username:</strong> {{username}} </div>
+      <div class="middle"><strong>User ID:</strong> {{id}}</div>
+       <div class="middle"><strong>Gender:</strong> {{gender}}</div>
+      <div class="middle"><strong>Age:</strong> {{age}} </div><br>
+      <div class="space">{{biography}}</div>
+    </div>
+  </div>
+</div>
+{% endblock %} 
