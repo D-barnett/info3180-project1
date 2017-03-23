@@ -8,7 +8,7 @@ This file creates your application.
 from app import app, db, login_manager
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, current_user, login_required
-from forms import ProfileForm, loginForm
+from forms import ProfileForm, LoginForm
 from models import UserProfile
 
 ###
@@ -24,84 +24,72 @@ def home():
 def about():
     """Render the website's about page."""
     return render_template('about.html')
-    
-@app.route("/profile/<userid>")
+
+
+@app.route("/profile", methods=('GET', 'POST'))
+def create_userprofile():
+    form = ProfileForm()
+
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            username = form.username.data
+            firstname = form.first_name.data
+            lastname = form.last_name.data
+            age = form.age.data
+            biography = form.biography.data
+            email = form.email.data
+            image =form.image.data 
+            gender = form.gender.data 
+      
+            # save user to database
+            user = UserProfile(username,firstname,lastname,age,biography,email,image,gender)
+            db.session.add(user)
+            db.session.commit()
+
+            flash('User successfully added')
+            return redirect(url_for('login'))
+
+    return render_template('profile.html', form=form)
+      
+      
+@app.route("/profile/<userid>", methods=('GET', 'POST'))
 @login_required
 def view_profile(userid):
     user=UserProfile.query.filter_by(userid==id).first()
     if user is None:
         return render_template('404.html')
-    return render_template('profiles.html', user=user)
+    return render_template('your_profile.html', user=user)
     
-@app.route("/profiles")
+@app.route("/profiles", methods=['GET', 'POST'])
 @login_required
 def view_user_profiles():
     user = UserProfile()
-    db.session.query(user).all()
-    return render_template('profiles.html')
-    #@app.route('/filelisting', methods=['POST', 'GET'])
-#def filelisting():
- #   if not session.get('logged_in'):
-  #      abort(401)
-        
-  #  listpath = os.walk('/home/ubuntu/workspace/app/static/uploads' )
-  #  for file in listpath:         
-  #      print file
-  #  return render_template('filelist.html', filelist=file)
+    users = db.query(user).all()
+    return render_template('all_users.html', users=users)
 
-@app.route("/profile", methods=('GET', 'POST'))
-def create_userprofile():
-    form = ProfileForm()
-    if request.method == 'POST'and form.validate_on_submit():
-        user = UserProfile(form.username.data, form.first_name.data, form.last_name.data, form.age.data, form.biography.data, form.email.data, form.image.data, form.gender.data)
-        db.session.add(user)
-        db.session.commit()
-        login_user(user)
-        return redirect(url_for('my_profile'))
-    elif request.method == 'GET':
-      return render_template('profile.html', form=form)
-     
-@app.route("/my_profile")
-@login_required
-def my_profile():
-    return render_template('your_profile.html')
-    
-    #if form.validate_on_submit():
-    #    user = UserProfile()
-    #    form.populate_obj(user)
-    #    db.session.add(user)
-    #    db.session.commit()
-    #    login_user(user)
-    #    return redirect(url_for('tracking.index'))
-    #return render_template('profile.html', form=form)
-    # if user == None:
-    #    flash('User %s not found.' % nickname)
-    #    return redirect(url_for('login.html'))
-    #return render_template('profiles.html')
-    
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    form = loginForm()
+    form = LoginForm()
     # Validates that a username and password was entered on your login form
-    if request.method == 'POST' and form.validate_on_submit():
-        if form.username.data:    
+    if request.method == 'POST':
+       if form.validate_on_submit():
             # Gets the username and password values from the form.
            username = request.form['username']
            email = request.form['email'] 
             
              # checks that the username and password entered matches a user that is in the database.
            user = UserProfile.query.filter(username==username, email==email).first()
-            
-           login_user(user)
+           
+           if user is not None:
+             login_user(user)
+             # flashes a message to the user
+             flash('Logged in successfully.', 'success')
+             return redirect(url_for("home"))
+           else:
+             flash('Username or Password is incorrect.', 'danger')
 
-            # flashes a message to the user
-           flash('Logged in successfully.', 'success')
-           return redirect(url_for("my_profile"))
-           
-           if user is None:
-                flash('Username or email is invalid' , 'error')
-           
+    flash_errors(form)
     return render_template("login.html", form=form)
 
 @app.route("/logout")
@@ -118,6 +106,13 @@ def logout():
 def load_user(id):
     return UserProfile.query.get(int(id))
 
+def flash_errors(form):
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+))
 ###
 # The functions below should be applicable to all Flask apps.
 ###

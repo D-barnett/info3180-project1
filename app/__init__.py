@@ -3,6 +3,7 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
+UPLOAD_FOLDER = './app/static/uploads'
 app.config['SECRET_KEY'] = "Sup3r$3cretkey"
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://webproj1:proj1@localhost/db_profile"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True # added just to suppress a warning

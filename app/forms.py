@@ -10,16 +10,14 @@ class ProfileForm(FlaskForm):
     last_name = TextField('Lastname', validators=[InputRequired()])
     age = TextField('Age', validators=[InputRequired()])
     biography = TextAreaField('Biography', validators=[InputRequired()])
-    email = TextField('Email', validators=[FileRequired(), Email()])
+    email = TextField('Email', validators=[InputRequired(), Email()])
     image = FileField('Image', validators=[FileRequired()])
     gender = SelectField('Gender', choices = [('M','Male'),('F','Female')], validators=[InputRequired()])
     submit = SubmitField('Create Profile')
     
-    
-class loginForm(FlaskForm):
-    username = TextField('Username', validators=[InputRequired()])
-    email = TextField('Email', validators=[FileRequired(), Email()])
-    submit = SubmitField('login')
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[InputRequired()])
+    email = TextField('Email', validators=[InputRequired(), Email()])
     
     def __init__(self, *args, **kwargs):
        FlaskForm.__init__(self, *args, **kwargs)
