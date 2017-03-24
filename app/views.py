@@ -42,20 +42,20 @@ def create_userprofile():
             gender = form.gender.data 
       
             # save user to database
-            user = UserProfile(username,firstname,lastname,age,biography,email,image,gender)
+            user = UserProfile(id, username,firstname,lastname,age,biography,email,image,gender)
             db.session.add(user)
             db.session.commit()
 
             flash('User successfully added')
             return redirect(url_for('login'))
-
+    flash_errors(form)
     return render_template('profile.html', form=form)
       
       
 @app.route("/profile/<userid>", methods=('GET', 'POST'))
 @login_required
 def view_profile(userid):
-    user=UserProfile.query.filter_by(userid==id).first()
+    user=UserProfile.query.filter_by(userid=userid).first_or_404()
     if user is None:
         return render_template('404.html')
     return render_template('your_profile.html', user=user)
@@ -63,8 +63,7 @@ def view_profile(userid):
 @app.route("/profiles", methods=['GET', 'POST'])
 @login_required
 def view_user_profiles():
-    user = UserProfile()
-    users = db.query(user).all()
+    users = UserProfile.query.all()
     return render_template('all_users.html', users=users)
 
 

@@ -13,14 +13,13 @@ class ProfileForm(FlaskForm):
     email = TextField('Email', validators=[InputRequired(), Email()])
     image = FileField('Image', validators=[FileRequired()])
     gender = SelectField('Gender', choices = [('M','Male'),('F','Female')], validators=[InputRequired()])
-    submit = SubmitField('Create Profile')
     
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[InputRequired()])
     email = TextField('Email', validators=[InputRequired(), Email()])
     
-    def __init__(self, *args, **kwargs):
-       FlaskForm.__init__(self, *args, **kwargs)
+    #def __init__(self, *args, **kwargs):
+    #   FlaskForm.__init__(self, *args, **kwargs)
     
     def validate(self):
       if not FlaskForm.validate(self):
